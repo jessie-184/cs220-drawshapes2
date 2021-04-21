@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -28,7 +29,8 @@ public class DrawShapes extends JFrame
     private enum ShapeType {
         SQUARE,
         CIRCLE,
-        RECTANGLE
+        RECTANGLE,
+        TRIANGLE
     }
     
     private DrawShapesPanel shapePanel;
@@ -68,13 +70,23 @@ public class DrawShapes extends JFrame
     private void initializeMouseListener()
     {
         MouseAdapter a = new MouseAdapter() {
-            
+        	
+//        	List<Object> allSelected = new ArrayList<Object>();
             public void mouseClicked(MouseEvent e)
-            {
+            {           	
                 System.out.printf("Mouse cliked at (%d, %d)\n", e.getX(), e.getY());
                 
-                if (e.getButton()==MouseEvent.BUTTON1) { 
-                    if (shapeType == ShapeType.SQUARE) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+//                	System.out.println(allSelected.size());
+//                	if (allSelected.size() > 0) {
+//                		Point p1 = e.getPoint();
+//                		IShape[] selectedArray = new IShape[allSelected.size()];
+//                		for(IShape s : allSelected.toArray(selectedArray)) {
+//                			s.setAnchorPoint(p1);
+//                			s.setSelected(false);                			
+//                		}
+//                		allSelected = new ArrayList<Object>();
+                	if (shapeType == ShapeType.SQUARE) {
                         scene.addShape(new Square(color, 
                                 e.getX(), 
                                 e.getY(),
@@ -89,7 +101,13 @@ public class DrawShapes extends JFrame
                                 100, 
                                 200,
                                 color));
+                    } else if (shapeType == ShapeType.TRIANGLE) {
+                    	scene.addShape(new Triangle(color,
+                    			e.getX(),
+                    			e.getY(),
+                    			100));
                     }
+                        
                     
                 } else if (e.getButton()==MouseEvent.BUTTON2) {
                     // apparently this is middle click
@@ -101,10 +119,12 @@ public class DrawShapes extends JFrame
                     if (selected.size() > 0){
                         for (IShape s : selected){
                             s.setSelected(true);
+//                            allSelected.add(s);
                         }
                     } else {
                         for (IShape s : scene){
                             s.setSelected(false);
+//                            allSelected.remove(s);
                         }
                     }
                     System.out.printf("Select %d shapes\n", selected.size());
@@ -209,7 +229,7 @@ public class DrawShapes extends JFrame
             }
         });
         fileMenu.addSeparator();
-        // edit
+        // exit
         JMenuItem itemExit = new JMenuItem ("Exit");
         fileMenu.add(itemExit);
         itemExit.addActionListener(new ActionListener() {
@@ -219,8 +239,7 @@ public class DrawShapes extends JFrame
                 System.exit(0);
             }
         });
-
-        
+       
         // OK, it's annoying to create menu items this way,
         // so let's use a helper method
         
@@ -260,6 +279,26 @@ public class DrawShapes extends JFrame
             }
         });
         
+        // mint color
+        addToMenu(colorMenu, "Mint", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String text=e.getActionCommand();
+                System.out.println(text);
+                // change the color instance variable to blue
+                color = new Color(207,255,229);
+            }
+        });
+        
+        // pink color
+        addToMenu(colorMenu, "Pink", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String text=e.getActionCommand();
+                System.out.println(text);
+                // change the color instance variable to blue
+                color = Color.PINK;
+            }
+        });
+        
         // shape menu
         JMenu shapeMenu = new JMenu("Shape");
         menuBar.add(shapeMenu);
@@ -282,6 +321,23 @@ public class DrawShapes extends JFrame
             }
         });
         
+        // rectangle
+        addToMenu(shapeMenu, "Rectangle", new ActionListener() {
+        	@Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Rectangle");
+                shapeType = ShapeType.RECTANGLE;
+            }
+        });
+        
+     // triangle
+        addToMenu(shapeMenu, "Triangle", new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Triangle");
+                shapeType = ShapeType.TRIANGLE;
+            }
+        });
         
         // operation mode menu
         JMenu operationModeMenu=new JMenu("Operation");
@@ -307,12 +363,58 @@ public class DrawShapes extends JFrame
             }
         });
         
-        // move option
-        addToMenu(operationModeMenu, "Move", new ActionListener() {
+        // move right option
+        addToMenu(operationModeMenu, "Move Right", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String text=e.getActionCommand();
+         	    String text=e.getActionCommand();
                 // currently this just prints
                 System.out.println(text);
+                scene.moveSelected(50, 0);
+                repaint();
+            }
+        });
+        
+        // move left option
+        addToMenu(operationModeMenu, "Move Left", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+         	    String text=e.getActionCommand();
+                // currently this just prints
+                System.out.println(text);
+                scene.moveSelected(-50, 0);
+                repaint();
+            }
+        });
+        
+        // move up option
+        addToMenu(operationModeMenu, "Move Up", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+         	    String text=e.getActionCommand();
+                // currently this just prints
+                System.out.println(text);
+                scene.moveSelected(0, -50);
+                repaint();
+            }
+        });
+        
+        // move down option
+        addToMenu(operationModeMenu, "Move Down", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+         	    String text=e.getActionCommand();
+                // currently this just prints
+                System.out.println(text);
+                scene.moveSelected(0, 50);
+                repaint();
+            }
+        });
+        
+        // delete option
+        addToMenu(operationModeMenu, "Delete", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+         	    String text=e.getActionCommand();
+                // currently this just prints
+                System.out.println(text);
+                scene.removeSelected();
+                repaint();
             }
         });
         
@@ -341,6 +443,10 @@ public class DrawShapes extends JFrame
             		scene.moveSelected(-50, 0);
             	} else if (e.getKeyCode() == KeyEvent.VK_UP) {
             		scene.moveSelected(0, -50);
+            	} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            		scene.moveSelected(0, 50);
+            	} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            		scene.moveSelected(50, 0);
             	}
             	repaint();
             }
@@ -359,7 +465,7 @@ public class DrawShapes extends JFrame
             }
         });
     }
-    
+      
     /**
      * @param args
      */
